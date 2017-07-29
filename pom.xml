@@ -8,7 +8,7 @@
     <!-- replace "jar" with "war" and -->
     <!-- comment ninja-standalone dependency and  -->
     <!-- uncomment the dependency for ninja-servlet -->
-    <packaging>jar</packaging>
+    <packaging>war</packaging>
     <groupId>com.ddblabs</groupId>
     <version>1.0-SNAPSHOT</version>
 
@@ -17,9 +17,11 @@
     <properties>
         <ninja.version>6.0.0</ninja.version>
         <jetty.version>9.3.11.v20160721</jetty.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
     <build>
+        <finalName>${project.name}</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -135,6 +137,47 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+              <groupId>org.codehaus.mojo</groupId>
+              <artifactId>rpm-maven-plugin</artifactId>
+              <version>2.1.5</version>
+              <executions>
+                <execution>
+                  <id>generate-rpm</id>
+                  <goals>
+                    <goal>rpm</goal>
+                  </goals>
+                </execution>
+              </executions>
+              <configuration>
+                <license>GPL (c) 2017, DDB Labs</license>
+                <distribution>DDB Labs 2017</distribution>
+                <packager>DDB Labs</packager>
+                <group>Applications/Internet</group>
+                <defineStatements>
+                  <defineStatement>_unpackaged_files_terminate_build 0</defineStatement>
+                </defineStatements>
+                <mappings>
+                  <mapping>
+                    <directory>/usr/local/tomcat/webapps</directory>
+                    <filemode>755</filemode>
+                    <username>tomcat</username>
+                    <groupname>tomcat</groupname>
+                    <sources>
+                      <source>
+                        <location>target/${project.build.finalName}.${project.packaging}</location>
+                      </source>
+                    </sources>
+                  </mapping>
+                </mappings>
+                <preinstallScriptlet>
+                  <script>service tomcat stop</script>
+                </preinstallScriptlet>
+                <postinstallScriptlet>
+                  <script>service tomcat start</script>
+                </postinstallScriptlet>
+              </configuration>
+            </plugin>
         </plugins>
         <resources>
             <resource>
@@ -173,18 +216,19 @@
         <!-- If you want to deploy to a war please -->
         <!-- comment ninja-standalone dependency and  -->
         <!-- uncomment the dependency for ninja-servlet -->
-        <!--
+
         <dependency>
             <groupId>org.ninjaframework</groupId>
             <artifactId>ninja-servlet</artifactId>
             <version>${ninja.version}</version>
         </dependency>
-        -->
+        <!--
         <dependency>
             <groupId>org.ninjaframework</groupId>
             <artifactId>ninja-standalone</artifactId>
             <version>${ninja.version}</version>
         </dependency>
+        -->
         <dependency>
             <groupId>org.ninjaframework</groupId>
             <artifactId>ninja-test-utilities</artifactId>
